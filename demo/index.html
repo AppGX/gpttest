@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Demo Vue 3</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .services button { margin: 4px; }
+    .schedule { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>Выбор справки</h1>
+    <select v-model="selectedCertificate" @change="selectCertificate">
+      <option disabled value="">Выберите справку</option>
+      <option v-for="cert in certificates" :key="cert.id" :value="cert">
+        {{ cert.name }}
+      </option>
+    </select>
+
+    <div v-if="services.length">
+      <h2>Доступные услуги</h2>
+      <div class="services">
+        <button v-for="service in services" :key="service.id" @click="selectService(service)">
+          {{ service.name }}
+        </button>
+      </div>
+    </div>
+
+    <div v-if="selectedService">
+      <h2>{{ selectedService.name }}</h2>
+      <p>Выберите способ прохождения:</p>
+      <div class="schedule">
+        <label>
+          <input type="radio" value="booking" v-model="mode" /> Записаться
+        </label>
+        <label>
+          <input type="radio" value="queue" v-model="mode" /> Живая очередь
+        </label>
+      </div>
+      <div v-if="mode === 'booking'" class="booking">
+        <label>Дата: <input type="date" v-model="bookingDate" /></label>
+        <label>Время: <input type="time" v-model="bookingTime" /></label>
+      </div>
+      <div v-if="mode === 'queue'">
+        <p>Вы выбрали живую очередь. Подойдите к кабинету без записи.</p>
+      </div>
+    </div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
