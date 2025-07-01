@@ -375,6 +375,402 @@ h2 {
   opacity: 0;
 }
 
+/* Маршрутный лист */
+.route-overview {
+  background: linear-gradient(135deg, var(--certificates-bg) 0%, var(--screening-bg) 100%);
+  border-radius: var(--border-radius-lg);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 2px solid var(--border-color);
+}
+
+.route-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.route-icon {
+  font-size: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 3px solid var(--primary-color);
+}
+
+.route-info {
+  flex: 1;
+}
+
+.route-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.route-info p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.route-cost {
+  text-align: right;
+}
+
+.cost-label {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.cost-value {
+  display: block;
+  color: var(--primary-color);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.route-note {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--info-bg);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--info-color);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.note-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* Этапы маршрута */
+.route-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.route-stage {
+  background: var(--surface);
+  border-radius: var(--border-radius-lg);
+  border: 2px solid var(--border-color);
+  overflow: hidden;
+  position: relative;
+}
+
+.stage-header {
+  background: var(--stage-bg, var(--surface-secondary));
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.stage-number {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--stage-color, var(--primary-color));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.stage-icon {
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--stage-color, var(--primary-color));
+  flex-shrink: 0;
+}
+
+.stage-info {
+  flex: 1;
+}
+
+.stage-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.stage-info p {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.stage-count {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: var(--stage-color, var(--primary-color));
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.stage-duration {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.stage-services {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.route-service {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--surface-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.route-service::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--stage-color, var(--primary-color));
+  transform: scaleX(0);
+  transition: var(--transition);
+}
+
+.route-service:hover {
+  border-color: var(--stage-color, var(--primary-color));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.route-service:hover::before {
+  transform: scaleX(1);
+}
+
+.route-service.selected {
+  border-color: var(--stage-color, var(--primary-color));
+  background: var(--stage-bg, rgba(79, 70, 229, 0.1));
+  box-shadow: 0 0 15px rgba(79, 70, 229, 0.2);
+}
+
+.route-service.selected::before {
+  transform: scaleX(1);
+}
+
+.route-service.unselected {
+  opacity: 0.6;
+  background: var(--surface);
+  border-style: dashed;
+}
+
+.route-service.unselected .service-content h4,
+.route-service.unselected .service-content p {
+  color: var(--text-muted);
+}
+
+.route-service.unselected .service-meta .price {
+  color: var(--text-muted);
+}
+
+.checkbox-empty {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.route-service .service-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.route-service .service-content p {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.service-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.service-meta .duration {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--surface);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.service-meta .price {
+  color: var(--stage-color, var(--primary-color));
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Соединители между этапами */
+.stage-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.connector-line {
+  width: 3px;
+  height: 30px;
+  background: linear-gradient(to bottom, var(--border-color), var(--primary-color));
+  border-radius: 3px;
+}
+
+.connector-arrow {
+  margin-top: 0.5rem;
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Сводка маршрута */
+.route-summary {
+  background: var(--surface-secondary);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  border: 2px solid var(--border-color);
+}
+
+.route-summary h3 {
+  margin: 0 0 1.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.summary-stats {
+  display: grid;
+  gap: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.stat-item.total {
+  border: 2px solid var(--primary-color);
+  background: var(--certificates-bg);
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  text-align: center;
+}
+
+.stat-label {
+  flex: 1;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stat-value {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.stat-item.total .stat-value {
+  color: var(--primary-color);
+  font-size: 1.3rem;
+}
+
+/* Финальные этапы */
+.final-stage-info {
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--surface-secondary), var(--surface));
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  margin: 1rem 0;
+}
+
+.final-message {
+  text-align: center;
+}
+
+.final-message p {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.final-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--info-bg);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--info-color);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.final-note span:first-child {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
 .certificate-item {
   display: flex;
   align-items: center;
@@ -581,6 +977,79 @@ h2 {
   .summary-footer {
     flex-direction: column;
     gap: 1rem;
+  }
+
+  /* Адаптивность маршрутного листа */
+  .route-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .route-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+    align-self: center;
+  }
+
+  .route-cost {
+    text-align: center;
+  }
+
+  .stage-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .stage-number {
+    align-self: center;
+  }
+
+  .stage-icon {
+    align-self: center;
+  }
+
+  .stage-duration {
+    align-self: center;
+  }
+
+  .route-service {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .summary-stats {
+    gap: 0.75rem;
+  }
+
+  .stat-item {
+    padding: 0.75rem;
+  }
+
+  .final-stage-info {
+    padding: 1.5rem;
+  }
+
+  .final-note {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .final-note span:first-child {
+    font-size: 2rem;
+  }
+
+  .route-note {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .note-icon {
+    font-size: 1.5rem;
   }
 }
 

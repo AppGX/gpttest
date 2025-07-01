@@ -41,6 +41,207 @@ const availableServices = computed(() => {
   )
 })
 
+// Предопределенные маршруты прохождения для разных типов справок
+const getMedicalRoute = (certificateId: string, selectedServices: Service[]) => {
+  // Создаем карту услуг для быстрого поиска
+  const serviceMap = new Map(selectedServices.map(s => [s.name, s]))
+  
+  // Определяем тип маршрута в зависимости от справки (по числовому ID)
+  let routeType = 'standard'
+  
+  // Справки для работы - особый маршрут (076/у = ID 3, ЛМК = ID 4, 073/у = ID 1)
+  if (['3', '4', '1'].includes(certificateId)) {
+    routeType = 'occupational'
+    console.log('Форма 076/у: используется occupational маршрут для ID', certificateId)
+  }
+  // Справки для детей - педиатрический маршрут (075/у = ID 2, Паспорт здоровья = ID 5)
+  else if (['2', '5'].includes(certificateId)) {
+    routeType = 'pediatric'
+  }
+  // Прегравидарная подготовка - специальный маршрут (ID 9, 10, 11)
+  else if (['9', '10', '11'].includes(certificateId)) {
+    routeType = 'preconception'
+  }
+  // Скрининги - профилактический маршрут (ID 12, 13, 14, 15)
+  else if (['12', '13', '14', '15'].includes(certificateId)) {
+    routeType = 'screening'
+  }
+
+  // Функция для безопасного получения услуг
+  const getServicesByNames = (names: string[]) => {
+    return selectedServices.filter(s => names.includes(s.name))
+  }
+
+  // Функция для безопасного получения одной услуги
+  const getServiceByName = (name: string) => {
+    const service = serviceMap.get(name)
+    return service ? [service] : []
+  }
+
+  switch (routeType) {
+    case 'occupational': // Для работы с вредными условиями
+      return [
+        {
+          stage: 1,
+          title: '🚀 Первичное обследование',
+          description: 'Терапевт + анализ крови (можно проходить параллельно)',
+          icon: '⚡',
+          services: getServicesByNames(['Терапевт', 'Анализ крови общий']),
+          color: 'var(--primary-color)',
+          bgColor: 'var(--certificates-bg)'
+        },
+        {
+          stage: 2,
+          title: '👥 Инфекционная безопасность + флюорография',
+          description: 'Флюорография и анализы на инфекции (гепатиты, ВИЧ, сифилис, кишечные инфекции)',
+          icon: '🏥',
+          services: (() => {
+            const foundServices = getServicesByNames(['Флюорография', 'Гепатиты B, C и ВИЧ', 'Анализ на сифилис (RW)', 'Анализ на кишечные инфекции'])
+            console.log('Найденные услуги для 2-го этапа:', foundServices.map(s => s.name))
+            return foundServices
+          })(),
+          color: 'var(--accent-color)',
+          bgColor: 'var(--screening-bg)'
+        },
+        {
+          stage: 3,
+          title: '📋 Заключение терапевта',
+          description: 'Анализ всех результатов и выдача справки',
+          icon: '✅',
+          services: [], // Терапевт для заключения
+          color: 'var(--success-color)',
+          bgColor: 'var(--preconception-bg)',
+          isFinal: true
+        }
+      ]
+
+         case 'pediatric': // Для детских справок
+       return [
+         {
+           stage: 1,
+           title: '🚀 Комплексное обследование',
+           description: 'Педиатр, специалисты и анализы (все параллельно)',
+           icon: '🧸',
+           services: getServicesByNames(['Педиатр', 'Невролог', 'Отоларинголог (ЛОР)', 'Офтальмолог', 'Стоматолог', 'Ортопед', 'Психолог', 'Анализ крови общий', 'Анализ мочи', 'Анализ на энтеробиоз']),
+           color: 'var(--accent-color)',
+           bgColor: 'var(--screening-bg)'
+         },
+         {
+           stage: 2,
+           title: '📋 Заключение педиатра',
+           description: 'Анализ результатов и оформление справки',
+           icon: '✅',
+           services: [], // Педиатр для заключения
+           color: 'var(--primary-color)',
+           bgColor: 'var(--certificates-bg)',
+           isFinal: true
+         }
+       ]
+
+     case 'preconception': // Прегравидарная подготовка
+       return [
+         {
+           stage: 1,
+           title: '🚀 Первичные консультации',
+           description: 'Гинеколог, генетик и базовые анализы (параллельно)',
+           icon: '🌸',
+           services: getServicesByNames(['Гинеколог', 'Врач-генетик', 'Анализ на инфекции TORCH', 'Фолиевая кислота и В12']),
+           color: 'var(--success-color)',
+           bgColor: 'var(--preconception-bg)'
+         },
+         {
+           stage: 2,
+           title: '🔬 Расширенная диагностика',
+           description: 'Гормональные анализы + УЗИ + коагулограмма',
+           icon: '💉',
+           services: getServicesByNames(['Гормоны репродуктивной системы', 'Гормоны щитовидной железы', 'Коагулограмма', 'УЗИ органов малого таза', 'ЭхоКГ (УЗИ сердца)']),
+           color: 'var(--info-color)',
+           bgColor: 'var(--info-bg)'
+         },
+         {
+           stage: 3,
+           title: '📋 Итоговая консультация гинеколога',
+           description: 'Анализ результатов и план подготовки к беременности',
+           icon: '✅',
+           services: [], // Гинеколог для заключения
+           color: 'var(--accent-color)',
+           bgColor: 'var(--screening-bg)',
+           isFinal: true
+         }
+       ]
+
+     case 'screening': // Профилактические скрининги
+       return [
+         {
+           stage: 1,
+           title: '🚀 Базовое скрининговое обследование',
+           description: 'Терапевт + анализы + ЭКГ + маммография (все параллельно)',
+           icon: '🩺',
+           services: getServicesByNames(['Терапевт', 'Анализ крови общий', 'Глюкоза натощак', 'Гликированный гемоглобин', 'ЭКГ', 'Маммография']),
+           color: 'var(--primary-color)',
+           bgColor: 'var(--certificates-bg)'
+         },
+         {
+           stage: 2,
+           title: '🔍 Расширенная диагностика',
+           description: 'УЗИ, Холтер ЭКГ и онкоскрининг',
+           icon: '🏥',
+           services: getServicesByNames(['УЗИ органов малого таза', 'Холтер ЭКГ', 'Цитология (мазок Папаниколау)', 'Онкомаркеры']),
+           color: 'var(--info-color)',
+           bgColor: 'var(--info-bg)'
+         },
+         {
+           stage: 3,
+           title: '📋 Заключение терапевта',
+           description: 'Анализ результатов и рекомендации',
+           icon: '✅',
+           services: [], // Терапевт для заключения
+           color: 'var(--success-color)',
+           bgColor: 'var(--preconception-bg)',
+           isFinal: true
+         }
+       ]
+
+     default: // Стандартный маршрут
+       return [
+         {
+           stage: 1,
+           title: '🚀 Комплексное обследование',
+           description: 'Все врачи-специалисты + анализы + флюорография (параллельно)',
+           icon: '🏥',
+           services: getServicesByNames(['Офтальмолог', 'Нарколог', 'Невролог', 'Отоларинголог (ЛОР)', 'Дерматовенеролог', 'Стоматолог', 'Ортопед', 'Психолог', 'Психиатр', 'Гинеколог', 'Анализ крови общий', 'Анализ мочи', 'Флюорография']),
+           color: 'var(--accent-color)',
+           bgColor: 'var(--screening-bg)'
+         },
+         {
+           stage: 2,
+           title: '📋 Заключение терапевта',
+           description: 'Анализ результатов и выдача справки',
+           icon: '✅',
+           services: getServiceByName('Терапевт'),
+           color: 'var(--primary-color)',
+           bgColor: 'var(--certificates-bg)',
+           isFinal: true
+         }
+       ]
+  }
+}
+
+// Маршрутный лист с предопределенными планами
+const serviceRoute = computed(() => {
+  if (!formData.value.selectedCertificate) return []
+  
+  // Получаем ВСЕ требуемые услуги для справки, а не только выбранные
+  const requiredServices = services.filter(service => 
+    formData.value.selectedCertificate!.requiredServices.includes(service.id)
+  )
+  
+  const routes = getMedicalRoute(formData.value.selectedCertificate.id.toString(), requiredServices)
+  
+  // Фильтруем этапы, оставляя только те, у которых есть услуги или которые являются финальными
+  return routes.filter(route => route.services.length > 0 || route.isFinal)
+})
+
 const additionalServices = computed(() => {
   const requiredServiceIds = formData.value.selectedCertificate?.requiredServices || []
   const selectedServiceIds = formData.value.selectedServices.map(s => s.id)
@@ -188,8 +389,19 @@ const isGroupCollapsed = (groupCategory: string) => {
 
 const selectCertificate = (certificate: Certificate) => {
   formData.value.selectedCertificate = certificate
-  formData.value.selectedServices = []
-  formData.value.serviceBookings = []
+  
+  // Автоматически выбираем все требуемые услуги
+  const requiredServices = services.filter(service => 
+    certificate.requiredServices.includes(service.id)
+  )
+  
+  formData.value.selectedServices = [...requiredServices]
+  formData.value.serviceBookings = requiredServices.map(service => ({
+    service,
+    bookingType: 'appointment', // временно, будет определен автоматически
+    date: today.value // устанавливаем сегодняшнюю дату по умолчанию
+  }))
+  
   formData.value.currentServiceIndex = 0
 }
 
@@ -493,48 +705,121 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Шаг 2: Выбор услуг -->
+      <!-- Шаг 2: Маршрутный лист -->
       <div v-if="currentStep === 2" class="step">
-        <h2>🔬 Выберите необходимые услуги</h2>
+        <h2>📋 Маршрутный лист</h2>
         <p style="text-align: center; margin-bottom: 2rem; color: var(--text-secondary);">
-          Для справки "{{ formData.selectedCertificate?.name }}" доступны следующие услуги:
+          Справка "{{ formData.selectedCertificate?.name }}" — план прохождения услуг по этапам
         </p>
         
-        <div class="services-list">
-          <div 
-            v-for="service in availableServices" 
-            :key="service.id"
-            class="service-item"
-            @click="toggleService(service)"
-            :class="{ 
-              'selected': isServiceSelected(service),
-              'multiple-select': true
-            }"
-          >
-            <div class="service-checkbox">
-              <span v-if="isServiceSelected(service)">✓</span>
+        <div class="route-overview">
+          <div class="route-header">
+            <div class="route-icon">🗺️</div>
+            <div class="route-info">
+              <h3>Ваш маршрут обследования</h3>
+              <p>{{ serviceRoute.length }} этапа • {{ availableServices.length }} услуг • {{ totalDuration }} мин</p>
             </div>
-            <div class="service-content">
-              <h3>{{ service.name }}</h3>
-              <p>{{ service.description }}</p>
-              <div class="service-details">
-                <div class="duration">{{ service.duration }} мин</div>
-                <div class="price">{{ service.price }} ₸</div>
+            <div class="route-cost">
+              <span class="cost-label">Общая стоимость:</span>
+              <span class="cost-value">{{ totalCost }} ₸</span>
+            </div>
+          </div>
+          <div class="route-note">
+            <span class="note-icon">💡</span>
+            <span>Это полный план обследования для вашей справки. Вы можете снимать галочки с ненужных услуг, но план остается как руководство.</span>
+          </div>
+        </div>
+
+        <div class="route-stages">
+          <div 
+            v-for="(stage, stageIndex) in serviceRoute" 
+            :key="stage.stage"
+            class="route-stage"
+            :style="{ '--stage-color': stage.color, '--stage-bg': stage.bgColor }"
+          >
+            <div class="stage-header">
+              <div class="stage-number">{{ stage.stage }}</div>
+              <div class="stage-icon">{{ stage.icon }}</div>
+              <div class="stage-info">
+                <h3>{{ stage.title }}</h3>
+                <p>{{ stage.description }}</p>
+                <span class="stage-count">{{ stage.services.length }} {{ stage.services.length === 1 ? 'услуга' : 'услуг' }}</span>
               </div>
+              <div class="stage-duration">
+                {{ stage.services.reduce((sum, s) => sum + s.duration, 0) }} мин
+              </div>
+            </div>
+            
+            <div class="stage-services" v-if="!stage.isFinal">
+              <div 
+                v-for="service in stage.services" 
+                :key="service.id"
+                class="route-service"
+                @click="toggleService(service)"
+                :class="{ 
+                  'selected': isServiceSelected(service),
+                  'unselected': !isServiceSelected(service)
+                }"
+              >
+                <div class="service-checkbox">
+                  <span v-if="isServiceSelected(service)">✓</span>
+                  <span v-else class="checkbox-empty">○</span>
+                </div>
+                <div class="service-content">
+                  <h4>{{ service.name }}</h4>
+                  <p>{{ service.description }}</p>
+                  <div class="service-meta">
+                    <span class="duration">{{ service.duration }} мин</span>
+                    <span class="price">{{ service.price }} ₸</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Финальный этап - только информация -->
+            <div v-if="stage.isFinal" class="final-stage-info">
+              <div class="final-message">
+                <p>{{ stage.description }}</p>
+                <div class="final-note">
+                  <span>💡</span>
+                  <span>После завершения всех исследований врач проанализирует результаты и оформит справку</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Соединительная линия между этапами -->
+            <div v-if="stageIndex < serviceRoute.length - 1" class="stage-connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow">↓</div>
             </div>
           </div>
         </div>
 
-        <div v-if="formData.selectedServices.length > 0" class="selected-summary">
-          <h3>📝 Выбранные услуги ({{ formData.selectedServices.length }})</h3>
-          <div class="selected-list">
-            <div v-for="service in formData.selectedServices" :key="service.id" class="selected-item">
-              <span>{{ service.name }}</span>
-              <span>{{ service.price }} ₸</span>
+        <div class="route-summary">
+          <div class="summary-card">
+            <h3>📊 Сводка маршрута</h3>
+            <div class="summary-stats">
+              <div class="stat-item">
+                <span class="stat-icon">⏱️</span>
+                <span class="stat-label">Общее время:</span>
+                <span class="stat-value">{{ totalDuration }} мин</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">💰</span>
+                <span class="stat-label">Стоимость услуг:</span>
+                <span class="stat-value">{{ formData.selectedServices.reduce((sum, s) => sum + s.price, 0) }} ₸</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">📋</span>
+                <span class="stat-label">Справка:</span>
+                <span class="stat-value">{{ formData.selectedCertificate?.price }} ₸</span>
+              </div>
+              <div class="stat-item total">
+                <span class="stat-icon">💳</span>
+                <span class="stat-label">Итого:</span>
+                <span class="stat-value">{{ totalCost }} ₸</span>
+              </div>
             </div>
-          </div>
-          <div class="summary-total">
-            <strong>Итого услуг: {{ formData.selectedServices.reduce((sum, s) => sum + s.price, 0) }} ₸</strong>
           </div>
         </div>
 
