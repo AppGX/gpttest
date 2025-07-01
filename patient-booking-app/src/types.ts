@@ -1,11 +1,23 @@
 // Интерфейсы для системы записи пациентов
 
+export type CertificateCategory = 'certificates' | 'preconception' | 'screening'
+
 export interface Certificate {
   id: number
   name: string
   description: string
   price: number
   requiredServices: number[]
+  category: CertificateCategory
+  icon?: string
+}
+
+export interface CertificateGroup {
+  category: CertificateCategory
+  title: string
+  description: string
+  icon: string
+  certificates: Certificate[]
 }
 
 export interface Service {
@@ -16,6 +28,7 @@ export interface Service {
   price: number
   hasQueue: boolean
   supportAppointments: boolean // поддерживает ли запись по времени
+  category?: CertificateCategory[] // для каких категорий справок подходит
 }
 
 export interface TimeSlot {

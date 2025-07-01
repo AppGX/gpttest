@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import type { Certificate, Service, BookingFormData, BookingStep, QueueInfo, ServiceBooking, ServiceSchedule } from './types'
-import { certificates, services, getServiceSchedule, getQueueInfo } from './data/mockData'
+import type { Certificate, Service, BookingFormData, BookingStep, QueueInfo, ServiceBooking, ServiceSchedule, CertificateGroup } from './types'
+import { services, getServiceSchedule, getQueueInfo, getCertificateGroups } from './data/mockData'
 
 // Реактивные данные
 const currentStep = ref<BookingStep>(1)
 const queueInfo = ref<QueueInfo>({ length: 8, estimatedWaitTime: 120 })
 const currentServiceSchedule = ref<ServiceSchedule | null>(null)
+const certificateGroups = ref<CertificateGroup[]>(getCertificateGroups())
 
 const formData = ref<BookingFormData>({
   selectedCertificate: null,
@@ -371,28 +372,64 @@ onMounted(() => {
 
       <!-- Шаг 1: Выбор справки -->
       <div v-if="currentStep === 1" class="step">
-        <h2>📋 Выберите справку для получения</h2>
-        <div class="certificate-list">
+        <h2>🏥 Выберите тип обследования</h2>
+        <p style="text-align: center; margin-bottom: 3rem; color: var(--text-secondary);">
+          Выберите подходящую категорию и конкретное обследование
+        </p>
+        
+        <div class="certificate-groups">
           <div 
-            v-for="certificate in certificates" 
-            :key="certificate.id"
-            class="certificate-item"
-            @click="selectCertificate(certificate)"
-            :class="{ 'selected': formData.selectedCertificate?.id === certificate.id }"
+            v-for="group in certificateGroups" 
+            :key="group.category"
+            class="certificate-group"
           >
-            <h3>{{ certificate.name }}</h3>
-            <p>{{ certificate.description }}</p>
-            <div class="price">{{ certificate.price }} ₽</div>
+            <div class="group-header">
+              <div class="group-icon">{{ group.icon }}</div>
+              <div class="group-info">
+                <h3>{{ group.title }}</h3>
+                <p>{{ group.description }}</p>
+                <span class="group-count">{{ group.certificates.length }} {{ group.certificates.length === 1 ? 'вариант' : 'вариантов' }}</span>
+              </div>
+            </div>
+            
+            <div class="group-certificates">
+              <div 
+                v-for="certificate in group.certificates" 
+                :key="certificate.id"
+                class="certificate-item"
+                @click="selectCertificate(certificate)"
+                :class="{ 'selected': formData.selectedCertificate?.id === certificate.id }"
+              >
+                <div class="certificate-icon">{{ certificate.icon }}</div>
+                <div class="certificate-content">
+                  <h4>{{ certificate.name }}</h4>
+                  <p>{{ certificate.description }}</p>
+                  <div class="certificate-meta">
+                    <span class="price">{{ certificate.price }} ₽</span>
+                    <span class="services-count">{{ certificate.requiredServices.length }} {{ certificate.requiredServices.length === 1 ? 'услуга' : 'услуг' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div style="text-align: center; margin-top: 2rem;">
-          <button 
-            v-if="formData.selectedCertificate" 
-            @click="nextStep()" 
-            class="btn btn-primary"
-          >
-            Продолжить →
-          </button>
+        
+        <div v-if="formData.selectedCertificate" class="selected-certificate-summary">
+          <div class="summary-card">
+            <div class="summary-header">
+              <span class="summary-icon">{{ formData.selectedCertificate.icon }}</span>
+              <div>
+                <h3>Выбрано: {{ formData.selectedCertificate.name }}</h3>
+                <p>{{ formData.selectedCertificate.description }}</p>
+              </div>
+            </div>
+            <div class="summary-footer">
+              <span class="summary-price">{{ formData.selectedCertificate.price }} ₽</span>
+              <button @click="nextStep()" class="btn btn-primary">
+                Продолжить →
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

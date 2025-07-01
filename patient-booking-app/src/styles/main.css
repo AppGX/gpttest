@@ -37,6 +37,15 @@
   --warning-bg: #fef3c7;
   --error-bg: #fee2e2;
   --info-bg: #dbeafe;
+  
+  /* Цвета для категорий */
+  --certificates-color: #4f46e5;
+  --preconception-color: #ec4899;
+  --screening-color: #10b981;
+  
+  --certificates-bg: #eef2ff;
+  --preconception-bg: #fdf2f8;
+  --screening-bg: #ecfdf5;
 }
 
 /* Темная тема отключена для всегда светлого дизайна
@@ -171,18 +180,92 @@ h2 {
   color: white;
 }
 
-/* Списки справок */
-.certificate-list {
-  display: grid;
-  gap: 1.5rem;
+/* Группировка справок */
+.certificate-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
   margin-bottom: 2rem;
 }
 
+.certificate-group {
+  background: var(--surface);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.certificate-group:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Заголовок группы */
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--surface-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.group-icon {
+  font-size: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border-color);
+}
+
+.group-info {
+  flex: 1;
+}
+
+.group-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.group-info p {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.group-count {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Справки в группе */
+.group-certificates {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
 .certificate-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   background: var(--surface-secondary);
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: 1.5rem;
+  padding: 1rem;
   cursor: pointer;
   transition: var(--transition);
   position: relative;
@@ -204,7 +287,7 @@ h2 {
 .certificate-item:hover {
   border-color: var(--primary-color);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow);
 }
 
 .certificate-item:hover::before {
@@ -213,7 +296,7 @@ h2 {
 
 .certificate-item.selected {
   border-color: var(--primary-color);
-  background: rgba(79, 70, 229, 0.1);
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(79, 70, 229, 0.05) 100%);
   box-shadow: 0 0 20px rgba(79, 70, 229, 0.2);
 }
 
@@ -221,23 +304,189 @@ h2 {
   transform: scaleX(1);
 }
 
-.certificate-item h3 {
+.certificate-icon {
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.certificate-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.certificate-content h4 {
+  margin: 0 0 0.5rem 0;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.certificate-content p {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.certificate-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.certificate-meta .price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.services-count {
+  padding: 0.25rem 0.5rem;
+  background: var(--accent-color);
+  color: white;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Сводка выбранной справки */
+.selected-certificate-summary {
+  margin-top: 3rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border-radius: var(--border-radius-lg);
+  border: 2px solid var(--success-color);
+}
+
+.summary-card {
+  background: var(--surface);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.summary-icon {
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--success-bg);
+  border: 2px solid var(--success-color);
+}
+
+.summary-header h3 {
+  margin: 0 0 0.25rem 0;
+  color: var(--text-primary);
   font-size: 1.2rem;
   font-weight: 600;
 }
 
-.certificate-item p {
+.summary-header p {
+  margin: 0;
   color: var(--text-secondary);
-  margin-bottom: 1rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
-.price {
-  color: var(--accent-color);
+.summary-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.summary-price {
+  font-size: 1.3rem;
   font-weight: 700;
-  font-size: 1.1rem;
+  color: var(--success-color);
+}
+
+/* Адаптивность для групп */
+@media (max-width: 768px) {
+  .certificate-groups {
+    gap: 2rem;
+  }
+  
+  .group-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .group-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 2.5rem;
+  }
+  
+  .certificate-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .certificate-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+  }
+  
+  .certificate-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .summary-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .summary-footer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .group-certificates {
+    padding: 1rem;
+  }
+  
+  .certificate-item {
+    padding: 0.75rem;
+  }
+  
+  .certificate-content h4 {
+    font-size: 1rem;
+  }
+  
+  .certificate-content p {
+    font-size: 0.85rem;
+  }
+  
+  .summary-card {
+    padding: 1rem;
+  }
 }
 
 /* Списки услуг */
