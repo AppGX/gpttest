@@ -180,6 +180,78 @@ h2 {
   color: white;
 }
 
+/* Поиск справок */
+.search-section {
+  margin-bottom: 2rem;
+}
+
+.search-box {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  background: var(--surface);
+  color: var(--text-primary);
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.search-clear {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--text-muted);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.9rem;
+}
+
+.search-clear:hover {
+  background: var(--text-secondary);
+}
+
+.no-results {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  background: var(--surface-secondary);
+  border-radius: var(--border-radius);
+  margin-top: 1rem;
+}
+
+.no-results p:first-child {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
 /* Группировка справок */
 .certificate-groups {
   display: flex;
@@ -208,6 +280,42 @@ h2 {
   padding: 1.5rem;
   background: var(--surface-secondary);
   border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.group-header:hover {
+  background: var(--background-secondary);
+}
+
+.group-toggle {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border-color);
+  transition: var(--transition);
+}
+
+.group-toggle:hover {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+  color: white;
+}
+
+.toggle-icon {
+  font-size: 1.2rem;
+  transition: var(--transition);
+  transform-origin: center;
+}
+
+.toggle-icon.collapsed {
+  transform: rotate(180deg);
 }
 
 .group-icon {
@@ -256,6 +364,15 @@ h2 {
   display: grid;
   gap: 1rem;
   padding: 1.5rem;
+  transition: all 0.3s ease-in-out;
+  max-height: 2000px;
+  overflow: hidden;
+}
+
+.group-certificates.collapsed {
+  max-height: 0;
+  padding: 0 1.5rem;
+  opacity: 0;
 }
 
 .certificate-item {

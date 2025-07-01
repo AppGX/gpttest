@@ -9,6 +9,10 @@ const queueInfo = ref<QueueInfo>({ length: 8, estimatedWaitTime: 120 })
 const currentServiceSchedule = ref<ServiceSchedule | null>(null)
 const certificateGroups = ref<CertificateGroup[]>(getCertificateGroups())
 
+// Состояния для первой страницы
+const searchQuery = ref('')
+const collapsedGroups = ref<Set<string>>(new Set())
+
 const formData = ref<BookingFormData>({
   selectedCertificate: null,
   selectedServices: [],
@@ -17,6 +21,19 @@ const formData = ref<BookingFormData>({
 })
 
 // Вычисляемые свойства
+const filteredCertificateGroups = computed(() => {
+  const query = searchQuery.value.toLowerCase().trim()
+  if (!query) return certificateGroups.value
+  
+  return certificateGroups.value.map(group => ({
+    ...group,
+    certificates: group.certificates.filter(cert => 
+      cert.name.toLowerCase().includes(query) || 
+      cert.description.toLowerCase().includes(query)
+    )
+  })).filter(group => group.certificates.length > 0)
+})
+
 const availableServices = computed(() => {
   if (!formData.value.selectedCertificate) return []
   return services.filter(service => 
@@ -155,6 +172,18 @@ const updateServiceSchedule = async () => {
   if (recommendedBookingType.value && !booking.bookingType) {
     setBookingType(recommendedBookingType.value as 'appointment' | 'queue')
   }
+}
+
+const toggleGroup = (groupCategory: string) => {
+  if (collapsedGroups.value.has(groupCategory)) {
+    collapsedGroups.value.delete(groupCategory)
+  } else {
+    collapsedGroups.value.add(groupCategory)
+  }
+}
+
+const isGroupCollapsed = (groupCategory: string) => {
+  return collapsedGroups.value.has(groupCategory)
 }
 
 const selectCertificate = (certificate: Certificate) => {
@@ -318,14 +347,14 @@ const printBookings = () => {
          ? `Дата и время: ${formattedDateTime.value(booking)}` 
          : 'Тип записи: Живая очередь'
        }
-       Стоимость: ${booking.service.price} ₽
+       Стоимость: ${booking.service.price} ₸
        Длительность: ${booking.service.duration} мин
     `
   })
   
   printContent += `
     ============
-    Общая стоимость: ${totalCost.value} ₽
+    Общая стоимость: ${totalCost.value} ₸
     Общая длительность: ${totalDuration.value} мин
     ============
     Дата выдачи: ${new Date().toLocaleString('ru-RU')}
@@ -373,26 +402,57 @@ onMounted(() => {
       <!-- Шаг 1: Выбор справки -->
       <div v-if="currentStep === 1" class="step">
         <h2>🏥 Выберите тип обследования</h2>
-        <p style="text-align: center; margin-bottom: 3rem; color: var(--text-secondary);">
+        <p style="text-align: center; margin-bottom: 2rem; color: var(--text-secondary);">
           Выберите подходящую категорию и конкретное обследование
         </p>
         
+        <!-- Поиск справок -->
+        <div class="search-section">
+          <div class="search-box">
+            <input 
+              type="text" 
+              v-model="searchQuery" 
+              placeholder="🔍 Поиск справок по названию или описанию..."
+              class="search-input"
+            >
+            <button 
+              v-if="searchQuery" 
+              @click="searchQuery = ''" 
+              class="search-clear"
+            >
+              ✕
+            </button>
+          </div>
+          <div v-if="searchQuery && filteredCertificateGroups.length === 0" class="no-results">
+            <p>🔍 Ничего не найдено по запросу "{{ searchQuery }}"</p>
+            <p>Попробуйте изменить поисковый запрос</p>
+          </div>
+        </div>
+        
         <div class="certificate-groups">
           <div 
-            v-for="group in certificateGroups" 
+            v-for="group in filteredCertificateGroups" 
             :key="group.category"
             class="certificate-group"
           >
-            <div class="group-header">
+            <div class="group-header" @click="toggleGroup(group.category)">
               <div class="group-icon">{{ group.icon }}</div>
               <div class="group-info">
                 <h3>{{ group.title }}</h3>
                 <p>{{ group.description }}</p>
                 <span class="group-count">{{ group.certificates.length }} {{ group.certificates.length === 1 ? 'вариант' : 'вариантов' }}</span>
               </div>
+              <div class="group-toggle">
+                <span class="toggle-icon" :class="{ 'collapsed': isGroupCollapsed(group.category) }">
+                  {{ isGroupCollapsed(group.category) ? '▼' : '▲' }}
+                </span>
+              </div>
             </div>
             
-            <div class="group-certificates">
+            <div 
+              class="group-certificates" 
+              :class="{ 'collapsed': isGroupCollapsed(group.category) }"
+            >
               <div 
                 v-for="certificate in group.certificates" 
                 :key="certificate.id"
@@ -405,7 +465,7 @@ onMounted(() => {
                   <h4>{{ certificate.name }}</h4>
                   <p>{{ certificate.description }}</p>
                   <div class="certificate-meta">
-                    <span class="price">{{ certificate.price }} ₽</span>
+                    <span class="price">{{ certificate.price }} ₸</span>
                     <span class="services-count">{{ certificate.requiredServices.length }} {{ certificate.requiredServices.length === 1 ? 'услуга' : 'услуг' }}</span>
                   </div>
                 </div>
@@ -424,7 +484,7 @@ onMounted(() => {
               </div>
             </div>
             <div class="summary-footer">
-              <span class="summary-price">{{ formData.selectedCertificate.price }} ₽</span>
+              <span class="summary-price">{{ formData.selectedCertificate.price }} ₸</span>
               <button @click="nextStep()" class="btn btn-primary">
                 Продолжить →
               </button>
@@ -459,7 +519,7 @@ onMounted(() => {
               <p>{{ service.description }}</p>
               <div class="service-details">
                 <div class="duration">{{ service.duration }} мин</div>
-                <div class="price">{{ service.price }} ₽</div>
+                <div class="price">{{ service.price }} ₸</div>
               </div>
             </div>
           </div>
@@ -470,11 +530,11 @@ onMounted(() => {
           <div class="selected-list">
             <div v-for="service in formData.selectedServices" :key="service.id" class="selected-item">
               <span>{{ service.name }}</span>
-              <span>{{ service.price }} ₽</span>
+              <span>{{ service.price }} ₸</span>
             </div>
           </div>
           <div class="summary-total">
-            <strong>Итого услуг: {{ formData.selectedServices.reduce((sum, s) => sum + s.price, 0) }} ₽</strong>
+            <strong>Итого услуг: {{ formData.selectedServices.reduce((sum, s) => sum + s.price, 0) }} ₸</strong>
           </div>
         </div>
 
@@ -515,7 +575,7 @@ onMounted(() => {
           <p>{{ currentService.description }}</p>
           <div class="service-info">
             <span>Длительность: {{ currentService.duration }} мин</span>
-            <span>Стоимость: {{ currentService.price }} ₽</span>
+            <span>Стоимость: {{ currentService.price }} ₸</span>
           </div>
         </div>
 
@@ -694,7 +754,7 @@ onMounted(() => {
               <p>{{ service.description }}</p>
               <div class="service-details">
                 <div class="duration">{{ service.duration }} мин</div>
-                <div class="price">{{ service.price }} ₽</div>
+                <div class="price">{{ service.price }} ₸</div>
               </div>
             </div>
             <div class="add-button">+</div>
@@ -722,7 +782,7 @@ onMounted(() => {
           
           <div class="certificate-info">
             <h4>📋 Справка</h4>
-            <p>{{ formData.selectedCertificate?.name }} - {{ formData.selectedCertificate?.price }} ₽</p>
+            <p>{{ formData.selectedCertificate?.name }} - {{ formData.selectedCertificate?.price }} ₸</p>
           </div>
 
           <div class="services-info">
@@ -730,7 +790,7 @@ onMounted(() => {
             <div v-for="(booking, index) in formData.serviceBookings" :key="index" class="booking-item">
               <div class="booking-header">
                 <h5>{{ index + 1 }}. {{ booking.service.name }}</h5>
-                <span class="booking-price">{{ booking.service.price }} ₽</span>
+                <span class="booking-price">{{ booking.service.price }} ₸</span>
               </div>
               <div class="booking-details">
                 <p>{{ booking.service.description }}</p>
@@ -749,7 +809,7 @@ onMounted(() => {
 
           <div class="summary-totals">
             <div class="total-row">
-              <strong>Общая стоимость: {{ totalCost }} ₽</strong>
+              <strong>Общая стоимость: {{ totalCost }} ₸</strong>
             </div>
             <div class="total-row">
               <strong>Общая длительность: {{ totalDuration }} мин</strong>
